@@ -1,0 +1,12 @@
+Energy_flow.c:37:6:energyflow_init	8	static
+Energy_flow.c:82:6:energyflow_step	8	static
+Energy_flow.c:110:13:energyFlow	8	static
+Energy_flow.c:138:13:energyflow_mode0	8	static
+Energy_flow.c:163:13:energyflow_preapre_to_race	8	static
+Energy_flow.c:174:13:energyflow_race	8	static
+Energy_flow.c:210:13:energyflow_end_race	8	static
+Energy_flow.c:218:13:SC_State	16	static
+Energy_flow.c:237:13:SC_Set_charging	16	static
+Energy_flow.c:243:13:FC_Decharching	16	static
+Energy_flow.c:259:13:energyflow_emergency	8	static
+Energy_flow.c:277:13:FC_to_SC_Current_regulator	16	static

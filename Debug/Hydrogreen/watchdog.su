@@ -1,0 +1,2 @@
+watchdog.c:24:6:watchdog_init	136	static,ignoring_inline_asm
+watchdog.c:57:13:watchdog_step	8	static

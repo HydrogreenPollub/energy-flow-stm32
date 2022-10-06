@@ -1,0 +1,10 @@
+rs485.c:64:9:crc_calc	16	static
+rs485.c:97:9:crc_calc_TX	16	static
+rs485.c:129:6:rs485_init	8	static
+rs485.c:139:6:rs485_step	8	static
+rs485.c:149:13:sendData	8	static,ignoring_inline_asm
+rs485.c:185:13:receiveData	16	static,ignoring_inline_asm
+rs485.c:250:6:HAL_UART_RxCpltCallback	16	static
+rs485.c:268:13:prepareNewDataToSend	16	static
+rs485.c:304:13:processReceivedData	16	static
+rs485.c:328:13:resetActData	4	static
