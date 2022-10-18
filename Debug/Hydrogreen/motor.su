@@ -1,2 +1,0 @@
-motor.c:14:6:motor_init	8	static
-motor.c:20:6:motor_set_PWM	4	static

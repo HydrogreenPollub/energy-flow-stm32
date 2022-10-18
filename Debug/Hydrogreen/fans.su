@@ -1,4 +1,0 @@
-fans.c:25:6:fans_init	8	static
-fans.c:31:6:fansStep	8	static
-fans.c:40:6:doCalculations	4	static
-fans.c:52:6:HAL_GPIO_EXTI_Callback	16	static

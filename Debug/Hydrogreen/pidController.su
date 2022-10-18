@@ -1,2 +1,0 @@
-pidController.c:15:6:PID_init	4	static
-pidController.c:38:6:PIDstep	4	static
