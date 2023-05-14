@@ -107,7 +107,7 @@ static uint8_t fill_fc_current_samples_table(void)
 {
 	uint8_t cnt = 0;
 	uint8_t status = 0;
-	if(cnt < NUM_OF_FC_CURRENT_SAMPLES);
+	if(cnt < NUM_OF_FC_CURRENT_SAMPLES)
 	{
 		raw_fc_current_samples_to_average[cnt] = rawFcCurrentSensorData;
 		cnt++;
