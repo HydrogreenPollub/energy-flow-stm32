@@ -17,7 +17,7 @@
 // ******************************************************************************************************************************************************** //
 
 #define UART_PORT_RS485 		huart2
-#define TX_FRAME_LENGHT 		21		         	///< Dlugosc wysylanej ramki danych (z suma CRC)
+#define TX_FRAME_LENGHT 		25		         	///< Dlugosc wysylanej ramki danych (z suma CRC)
 #define RX_FRAME_LENGHT 		6				///< Dlugosc otrzymywanej ramki danych (z suma CRC)
 #define EOT_BYTE			0x17				///< Bajt wskazujacy na koniec ramki
 
@@ -288,6 +288,10 @@ static void prepareNewDataToSend(void)
   dataToTx[++j] = VALUES.SC_V.array[3];
   dataToTx[++j] = FANS.fanstors485.rpmtoRS[0];
   dataToTx[++j] = FANS.fanstors485.rpmtoRS[1];
+  dataToTx[++j] = VALUES.FC_CURRENT.array[0];
+  dataToTx[++j] = VALUES.FC_CURRENT.array[1];
+  dataToTx[++j] = VALUES.FC_CURRENT.array[2];
+  dataToTx[++j] = VALUES.FC_CURRENT.array[3];
   dataToTx[++j] = EOT_BYTE;
   //OBLICZ SUME KONTROLNA
   uint8_t calculatedCrcSumOnMCU = crc_calc_TX();
