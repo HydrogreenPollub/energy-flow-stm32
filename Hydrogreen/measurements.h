@@ -13,6 +13,8 @@
 extern uint32_t sc_voltage_diff;
 extern uint32_t sc_voltage_diff_value;
 extern uint16_t adcDataToCalculate[4];
+extern uint32_t rawFcCurrentSensorData; //Data in raw ADC
+
 typedef struct
 {
   union
@@ -47,6 +49,13 @@ typedef struct
   float prev_SC_C;
   float SC_C_to_average;
   uint8_t SC_C_Const;
+
+  union
+  {
+	float value;
+	uint8_t array[4];
+  } FC_CURRENT;
+  float fc_current_value_to_average;
 } MEASUREMENTS;
 extern MEASUREMENTS VALUES;
 extern void adc_init(void);

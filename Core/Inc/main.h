@@ -62,6 +62,8 @@ void Error_Handler(void);
 #define MCO_GPIO_Port GPIOF
 #define MOTOR_PWM_Pin GPIO_PIN_0
 #define MOTOR_PWM_GPIO_Port GPIOA
+#define FC_CURRENT_SENSOR_Pin GPIO_PIN_1
+#define FC_CURRENT_SENSOR_GPIO_Port GPIOA
 #define RS_TX_Pin GPIO_PIN_2
 #define RS_TX_GPIO_Port GPIOA
 #define RS_RX_Pin GPIO_PIN_3

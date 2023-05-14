@@ -29,7 +29,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "hydrogreen.h"
+#include "../../Hydrogreen/hydrogreen.h"
 
 /* USER CODE END Includes */
 
@@ -106,6 +106,7 @@ int main(void)
   MX_IWDG_Init();
   MX_TIM6_Init();
   MX_TIM7_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
   hydrogreen_main();
   /* USER CODE END 2 */
