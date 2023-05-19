@@ -12,6 +12,8 @@
 void fansStep(void);
 void fans_init(void);
 
+extern uint8_t fans_error;
+
 typedef struct
 {
   union
@@ -22,5 +24,6 @@ typedef struct
   uint16_t rpm_1;
   uint32_t controlValue;
 } FC_FANS;
+
 extern FC_FANS FANS;
 

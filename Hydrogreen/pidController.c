@@ -94,7 +94,7 @@ void PIDstep()
        */
 
       //FANS.controlValue = FC_T_PID.controlValue;
-      FANS.controlValue = 150;
+      FANS.controlValue = 150; //FIXED VALUE, IF YOU WANT REAL REGULATOR YOU NEED CHANGE HERE
       FC_T_PID.lastError = FC_T_PID.error;
       FC_T_PID.prevMeasurement = FC_T_PID.measurement;
       time = 0;

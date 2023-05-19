@@ -16,23 +16,24 @@
 #include "pidController.h"
 #include "measurements.h"
 
-uint8_t dupa = 2;
+uint8_t debug_state = 2;
 EnergyFlow hydros;
 PID_struct SC_C_regulator;
 //CurrentRegulator SC_C_regulator;
-uint32_t dupaPWM = 0;
-uint8_t dupaStanSC = 0;
+uint32_t debug_super_capacitors_pwm_value = 0;
+uint8_t debug_super_capacitors_state = 0;
 
 static void energyFlow();
-static void energyflow_mode0(void);
-static void energyflow_preapre_to_race(void);
-static void energyflow_race(void);
-static void energyflow_end_race(void);
-static void energyflow_emergency(void);
+static void energy_flow_state_laboratory_test(void);
+static void energy_flow_state_fuel_cell_purging(void);
+static void energy_flow_state_race(void);
+static void energy_flow_state_idle(void);
+static void energy_flow_state_emergency(void);
 static void SC_State(uint8_t state);
 static void SC_Set_charging();
-static void FC_Decharching(uint8_t state);
+static void fuel_cell_purge_valve_control(uint8_t state); //comment just to shut Karmelita up, uważam to nazewnictwo za lepsze i teraz po roku przerwy go używam, jak chcesz zmień całość :) <3
 static void FC_to_SC_Current_regulator(uint8_t current);
+static void energy_folw_update_emergency(void); //DUMB BUT FASTEST TO IMPLEMENT WAY TO UPDATE ERROR STATUS
 
 void energyflow_init(void)
 {
@@ -81,29 +82,26 @@ void energyflow_init(void)
 
 void energyflow_step(void)
 {
+  energy_folw_update_emergency();
   if (!rs485_flt && !emergency)
     {
-      dupa = 1;
+      debug_state = 1;
       switch (RS485_RX_VERIFIED_DATA.emergencyScenario)
 	{
 	case 0:
 	  energyFlow();
 	break;
 	case 1:
-	  //energyflow_emergency();
-	  energyFlow();
-
+	  energy_flow_state_emergency();
 	break;
 	default:
-	  //energyflow_emergency();
-	  energyFlow();
-
+	  energy_flow_state_emergency();
 	break;
 	}
     }
   else
     {
-      energyflow_emergency();
+      energy_flow_state_emergency();
     }
 }
 
@@ -113,29 +111,29 @@ static void energyFlow()
   switch (RS485_RX_VERIFIED_DATA.mode)
     {
     case 0:
-      energyflow_mode0();
-      dupa = 2;
+      energy_flow_state_laboratory_test(); //Debug mode, for work without any other controller (laboratory tests, with only Hydrogen circuit)
+      debug_state = 2;
     break;
 
     case 1:
-      energyflow_preapre_to_race();
+      energy_flow_state_fuel_cell_purging();
     break;
 
     case 2:
-      energyflow_race();
+      energy_flow_state_race();
     break;
 
     case 3:
-      energyflow_end_race();
+      energy_flow_state_idle();
     break;
 
     default:
-      energyflow_emergency();
+      energy_flow_state_emergency();
     break;
     }
 }
 
-static void energyflow_mode0()
+static void energy_flow_state_laboratory_test()
 {
   FC_T_PID.setValue = 50;
 
@@ -145,42 +143,40 @@ static void energyflow_mode0()
       SC_State(0);
       //hydros.charging = 0;
       FC_to_SC_Current_regulator(3);
-      dupaPWM = hydros.charging;
-      FC_Decharching(0);
+      debug_super_capacitors_pwm_value = hydros.charging;
+      fuel_cell_purge_valve_control(0);
     break;
     case 1:
       SC_State(1);
       hydros.charging = 0;
       FC_to_SC_Current_regulator(3);
-      FC_Decharching(0);
+      fuel_cell_purge_valve_control(0);
     break;
     default:
-      energyflow_emergency();
+      energy_flow_state_emergency();
     break;
     }
 }
 
-static void energyflow_preapre_to_race()
+static void energy_flow_state_fuel_cell_purging()
 {
   //FC_T_PID.setValue = 10;
   FC_T_PID.setValue = 50;
   hydros.charging = 0;
-  SC_State(0);
+  SC_State(0); //Pytanie do was, trzeba namyślić się jaka opcja lepsza, włączone, czy wyłączone kondy przy przedmuchu ^^
   FC_to_SC_Current_regulator(0);
-  //SC_Set_charging(hydros.charging);
-  FC_Decharching(1);
+  fuel_cell_purge_valve_control(1);
 }
 
-static void energyflow_race()
+static void energy_flow_state_race()
 {
-  //FC_T_PID.setValue = 10;
-  FC_T_PID.setValue = 50;
-  FC_Decharching(0);
-  //RS485_RX_VERIFIED_DATA.scOn = 0;
+
+  FC_T_PID.setValue = 50; //It's a place where You can change temperature setpoint
+  fuel_cell_purge_valve_control(0);
   switch (RS485_RX_VERIFIED_DATA.scOn)
     {
     case 0:
-      SC_State(0);
+      SC_State(0); //Close transistor for disabling current flow from SC battery to the electric motor
       if (VALUES.SC_V.value <= 48.5)
 	{
 	  FC_to_SC_Current_regulator(5);
@@ -191,7 +187,7 @@ static void energyflow_race()
 	}
     break;
     case 1:
-      SC_State(1);
+      SC_State(1); //Open transistor for enabling current flow from SC battery to the electric motor
       if (VALUES.SC_V.value <= 48.5)
 	{
 	  FC_to_SC_Current_regulator(5);
@@ -202,17 +198,17 @@ static void energyflow_race()
 	}
     break;
     default:
-      energyflow_emergency();
+      energy_flow_state_emergency();
     break;
     }
 }
 
-static void energyflow_end_race()
+static void energy_flow_state_idle()
 {
   hydros.charging = 0;
   SC_Set_charging(hydros.charging);
   SC_State(0);
-  FC_Decharching(0);
+  fuel_cell_purge_valve_control(0);
 }
 
 static void SC_State(uint8_t state)
@@ -221,15 +217,15 @@ static void SC_State(uint8_t state)
     {
     case 0:
       HAL_GPIO_WritePin(SC_ON_GPIO_Port, SC_ON_Pin, RESET);
-      dupaStanSC = 0;
+      debug_super_capacitors_state = 0;
     break;
     case 1:
-      dupaStanSC = 1;
+      debug_super_capacitors_state = 1;
       HAL_GPIO_WritePin(SC_ON_GPIO_Port, SC_ON_Pin, SET);
     break;
     default:
       HAL_GPIO_WritePin(SC_ON_GPIO_Port, SC_ON_Pin, RESET);
-      dupaStanSC = 0;
+      debug_super_capacitors_state = 0;
     break;
     }
 }
@@ -237,10 +233,10 @@ static void SC_State(uint8_t state)
 static void SC_Set_charging(uint32_t charging)
 {
   TIM3->CCR3 = hydros.charging;
-  dupaPWM = hydros.charging;
+  debug_super_capacitors_pwm_value = hydros.charging;
 }
 
-static void FC_Decharching(uint8_t state)
+static void fuel_cell_purge_valve_control(uint8_t state)
 {
   switch (state)
     {
@@ -251,27 +247,33 @@ static void FC_Decharching(uint8_t state)
       HAL_GPIO_WritePin(PURGING_GPIO_Port, PURGING_Pin, SET);
     break;
     default:
-      energyflow_emergency();
+      energy_flow_state_emergency();
     break;
     }
 }
 
-static void energyflow_emergency()
+static void energy_flow_state_emergency()
 {
   hydros.charging = 0;
   SC_Set_charging(hydros.charging);
   SC_State(0);
-  dupa = 0;
+  debug_state = 0;
   switch (RS485_RX_VERIFIED_DATA.mode)
     {
     case 1:
-      //FC_Decharching(1);
-      FC_Decharching(0);
+      fuel_cell_purge_valve_control(0);
     break;
     default:
-      FC_Decharching(0);
+      fuel_cell_purge_valve_control(0);
     break;
     }
+}
+
+static void energy_folw_update_emergency(void)
+{
+  emergency = super_capacitors_over_current || super_capacitors_over_voltage
+      || fuel_cell_under_voltage || fuel_cell_over_temperature
+      || fuel_cell_over_current || fans_error;
 }
 
 static void FC_to_SC_Current_regulator(uint8_t current)
@@ -345,7 +347,7 @@ static void FC_to_SC_Current_regulator(uint8_t current)
 	  if (!RS485_RX_VERIFIED_DATA.emergencyScenario)
 	    {
 	      hydros.charging = SC_C_regulator.controlValue;
-	      dupaPWM = hydros.charging;
+	      debug_super_capacitors_pwm_value = hydros.charging;
 	      SC_Set_charging(hydros.charging);
 	      if (VALUES.SC_C.value >= 40)
 		{
@@ -356,7 +358,7 @@ static void FC_to_SC_Current_regulator(uint8_t current)
 	    {
 	      hydros.charging = 0;
 	      SC_Set_charging(0);
-	      dupaPWM = 0;
+	      debug_super_capacitors_pwm_value = 0;
 	    }
 	  time = 0;
 	}

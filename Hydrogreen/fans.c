@@ -14,13 +14,16 @@
 #define fan_1_PORT GPIOB
 #define fan_2_PORT GPIOB
 
+static void doCalculations(void);
+static void fans_update_emergency(void);
+
 static uint8_t sampleTime = 0;
 static uint8_t pulses_1 = 0;
 static uint8_t pulses_2 = 0;
 
-FC_FANS FANS;
+uint8_t fans_error = 0;
 
-static void doCalculations(void);
+FC_FANS FANS;
 
 void fans_init()
 {
@@ -31,10 +34,7 @@ void fans_init()
 void fansStep(void)
 {
   doCalculations();
-  if (FANS.rpm_1 == 0 || FANS.fanstors485.rpm_2 == 0)
-    {
-     // emergency = 1;
-    }
+  fans_update_emergency();
 }
 
 void doCalculations(void)   //co 150 ms
@@ -49,6 +49,19 @@ void doCalculations(void)   //co 150 ms
       sampleTime = 0;	//zeruj czas pomiaru
     }
 }
+
+static void fans_update_emergency(void)
+{
+  if (FANS.rpm_1 == 0 || FANS.fanstors485.rpm_2 == 0)
+    {
+      fans_error = 1;
+    }
+  else
+    {
+      fans_error = 0;
+    }
+}
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   //Zlicza impulsy poszczegolnych wentylatorow

@@ -15,6 +15,13 @@ extern uint32_t sc_voltage_diff_value;
 extern uint16_t adcDataToCalculate[4];
 extern uint32_t rawFcCurrentSensorData; //Data in raw ADC
 
+extern uint8_t fuel_cell_under_voltage;
+extern uint8_t fuel_cell_over_temperature;
+extern uint8_t fuel_cell_over_current;
+
+extern uint8_t super_capacitors_over_current;
+extern uint8_t super_capacitors_over_voltage;
+
 typedef struct
 {
   union
@@ -52,11 +59,12 @@ typedef struct
 
   union
   {
-	float value;
-	uint8_t array[4];
+    float value;
+    uint8_t array[4];
   } FC_CURRENT;
   float fc_current_value_to_average;
 } MEASUREMENTS;
+
 extern MEASUREMENTS VALUES;
 extern void adc_init(void);
 extern void adc_step(void);

@@ -312,17 +312,6 @@ static void processReceivedData(void)
   RS485_RX_VERIFIED_DATA.scOn = dataFromRx[++i];
   RS485_RX_VERIFIED_DATA.emergencyScenario = dataFromRx[++i];
   RS485_RX_VERIFIED_DATA.motorPWM = dataFromRx[++i];
-  switch (emergency)
-    {
-    case 0:
-     // emergency = RS485_RX_VERIFIED_DATA.emergencyScenario;
-    break;
-    case 1:
-      emergency = emergency;
-    break;
-    default:
-    break;
-    }
 }
 
 /**
