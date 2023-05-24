@@ -64,7 +64,7 @@ static void calculateValues(void) {
 	VALUES.SC_V_to_average = (((float) adcDataToCalculate[1]) * 62.5f)
 			/ 4095.0f;
 	// VALUES.SC_C_to_average = (((float) adcDataToCalculate[2]) / 4095.0f) * 5.0f;
-	VALUES.SC_C_to_average = (((((float) adcDataToCalculate[3] * 5.178f)
+	VALUES.SC_C_to_average.value = (((((float) adcDataToCalculate[3] * 5.178f)
 			/ 4095.0f)) - 2.5f) * (25.0f / 0.625f);
 	VALUES.FC_V_to_average = (((float) adcDataToCalculate[2]) * 65.2f)
 			/ 4095.0f;
@@ -80,14 +80,14 @@ static void averaging_Values(void) {
 			+ VALUES.SC_V_to_average) / VALUES.SC_V_Const;
 
 	VALUES.SC_C.value = (VALUES.prev_SC_C * (VALUES.SC_C_Const - 1)
-			+ VALUES.SC_C_to_average) / VALUES.SC_C_Const;
+			+ VALUES.SC_C_to_average.value) / VALUES.SC_C_Const;
 
 	VALUES.FC_V.value = (VALUES.prev_FC_V * (VALUES.FC_V_Const - 1)
 			+ VALUES.FC_V_to_average) / VALUES.FC_V_Const;
 
 	VALUES.prev_FC_Temp = VALUES.FC_Temp_to_average;
 	VALUES.prev_FC_V = VALUES.FC_V_to_average;
-	VALUES.prev_SC_C = VALUES.SC_C_to_average;
+	VALUES.prev_SC_C = VALUES.SC_C_to_average.value;
 	VALUES.prev_SC_V = VALUES.SC_V_to_average;
 }
 
@@ -98,7 +98,7 @@ static void calculate_fc_current(void) {
 
 	temporary_fc_current = ((voltage_from_adc / 5) * 96) - 48; //formula developed by Hydrogreen members
 
-	VALUES.fc_current_value_to_average = temporary_fc_current;
+	VALUES.fc_current_value_to_average.value = temporary_fc_current;
 }
 
 static void get_raw_fc_current_value(void) {
@@ -148,11 +148,6 @@ static void update_error_from_measurements(void)
 		super_capacitors_over_voltage = 0;
 	}
 
-	if (VALUES.FC_V.value <= 30) {
-		fuel_cell_under_voltage = 1;
-	} else {
-		fuel_cell_under_voltage = 0;
-	}
 	if (VALUES.FC_TEMP.value >= 65) {
 		fuel_cell_over_temperature = 1;
 	} else {

@@ -53,8 +53,12 @@ typedef struct
     float value;
     uint8_t array[4];
   } SC_C;
+  union {
+	  float value;
+	  uint8_t array[4];
+  } SC_C_to_average;
   float prev_SC_C;
-  float SC_C_to_average;
+
   uint8_t SC_C_Const;
 
   union
@@ -62,7 +66,12 @@ typedef struct
     float value;
     uint8_t array[4];
   } FC_CURRENT;
-  float fc_current_value_to_average;
+  union
+  {
+	  float value;
+	  uint8_t array[4];
+  } fc_current_value_to_average;
+
 } MEASUREMENTS;
 
 extern MEASUREMENTS VALUES;
